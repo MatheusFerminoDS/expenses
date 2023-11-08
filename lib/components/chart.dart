@@ -8,7 +8,7 @@ class Chart extends StatelessWidget {
   // A lista de transações recentes é passada como parâmetro no construtor da classe
   final List<Transaction> recentTransaction;
 
-  Chart(this.recentTransaction);
+  const Chart(this.recentTransaction, {super.key});
 
   // Agrupa as transações por dia da semana
   List<Map<String, Object>> get groupedTransaction {
@@ -19,12 +19,12 @@ class Chart extends StatelessWidget {
 
       double totalSum = 0.0;
 
-      for(var i = 0; i < recentTransaction.length; i++) {
+      for (var i = 0; i < recentTransaction.length; i++) {
         bool sameDay = recentTransaction[i].date.day == weekDay.day;
         bool sameMonth = recentTransaction[i].date.month == weekDay.month;
         bool sameYear = recentTransaction[i].date.year == weekDay.year;
 
-        if(sameDay && sameMonth && sameYear) {
+        if (sameDay && sameMonth && sameYear) {
           totalSum += recentTransaction[i].value;
         }
       }
@@ -47,7 +47,7 @@ class Chart extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 6,
-      margin: EdgeInsets.all(20),
+      margin: const EdgeInsets.all(20),
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: Row(
@@ -58,7 +58,9 @@ class Chart extends StatelessWidget {
               child: ChartBar(
                 label: tr['day'] as String,
                 value: tr['value'] as double,
-                percentage: _weekTotalValue == 0 ? 0 : (tr['value'] as double) / _weekTotalValue,
+                percentage: _weekTotalValue == 0
+                    ? 0
+                    : (tr['value'] as double) / _weekTotalValue,
               ),
             );
           }).toList(),
