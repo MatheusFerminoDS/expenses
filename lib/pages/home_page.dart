@@ -1,10 +1,15 @@
-import 'dart:math';
-
 import 'package:expenses/components/chart.dart';
 import 'package:expenses/components/transaction_form.dart';
 import 'package:expenses/components/transaction_list.dart';
+import 'package:expenses/features/transactions/local_transaction_controller.dart';
+import 'package:expenses/locator.dart';
 import 'package:expenses/models/transaction.dart';
 import 'package:flutter/material.dart';
+
+// [MODIFIED] Matts1vn
+// mudei o corpo das funcoes para usarem o banco de dados offline e tambem
+// adicionei o futurebuilder para ele recuperar as informacoes do banco de dados
+// e atribuir a variavel _transactions
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -14,8 +19,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<Transaction> _transactions =
-      []; // Lista para armazenar as transações
+  List<Transaction> _transactions = []; // Lista para armazenar as transações
 
   // Retorna uma lista das transações dos últimos 7 dias
   List<Transaction> get _recentTransactions {
@@ -27,26 +31,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // Adiciona uma nova transação à lista
-  _addTransaction(String title, double value, DateTime date) {
-    final newTransaction = Transaction(
-      id: Random().nextDouble().toString(),
-      title: title,
-      value: value,
-      date: date,
+  _addTransaction(String title, double value, DateTime date) async {
+    await locator<LocalTransactionController>().addTransaction(
+      title,
+      value,
+      date,
     );
 
-    setState(() {
-      _transactions.add(newTransaction);
-    });
+    setState(() {});
 
     Navigator.of(context).pop();
   }
 
   // Remove uma transação da lista
-  _removeTransaction(String id) {
-    setState(() {
-      _transactions.removeWhere((tr) => tr.id == id);
-    });
+  _removeTransaction(String id) async {
+    await locator<LocalTransactionController>().removeTransaction(id);
+
+    setState(() {});
   }
 
   // Abre o formulário de transação em um modal
@@ -75,18 +76,28 @@ class _MyHomePageState extends State<MyHomePage> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () => _openTransactionFormModal(context),
-          )
+          ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Chart(_recentTransactions), // Exibe o gráfico de transações
-            TransactionList(_transactions,
-                _removeTransaction), // Exibe a lista de transações
-          ],
-        ),
+      body: FutureBuilder(
+        future: locator<LocalTransactionController>().getTransactions(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            _transactions = snapshot.data as List<Transaction>;
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Chart(_recentTransactions), // Exibe o gráfico de transações
+                  TransactionList(_transactions,
+                      _removeTransaction), // Exibe a lista de transações
+                ],
+              ),
+            );
+          } else {
+            return const CircularProgressIndicator();
+          }
+        },
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor:

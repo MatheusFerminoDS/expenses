@@ -1,6 +1,9 @@
-import 'package:expenses/pages/home_page.dart';
+import 'package:expenses/application/routes.dart';
+import 'package:expenses/locator.dart';
 import 'package:flutter/material.dart';
 
+// [MODIFIED] Matts1vn
+// fiz esse arquivo root para reparar a classe root do material app
 class ExpensesApp extends StatelessWidget {
   const ExpensesApp({super.key});
 
@@ -8,7 +11,10 @@ class ExpensesApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Retorna um widget MaterialApp que é a raiz do aplicativo
     return MaterialApp(
-      home: const MyHomePage(), // Define a página inicial do aplicativo
+      title: "Expenses",
+      routes: locator<Routes>().getRoutes(), //Lista de rotas
+      initialRoute: locator<Routes>()
+          .initialRoute, // Define a página inicial do aplicativo
       theme: ThemeData(
         primarySwatch: Colors.purple, // Define a cor primária do tema
         colorScheme: ColorScheme.fromSwatch().copyWith(
